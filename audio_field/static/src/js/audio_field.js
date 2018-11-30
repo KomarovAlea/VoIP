@@ -1,46 +1,31 @@
 /*
-# Copyright 2017 Oleksandr Komarov (https://modool.pro)
+# Copyright 2018 Oleksandr Komarov (https://modool.pro)
 # License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
 */
 
 odoo.define('web.audio_field', function (require) {
 "use strict";
 
-var QWeb = require('web.core').qweb;
-var field_registry = require('web.field_registry');
+var core = require('web.core');
 
-var FieldChar = field_registry.get('char');
+var FieldChar = core.form_widget_registry.get('char');
+var QWeb = core.qweb;
 
 
 var AudioField = FieldChar.extend({
-    // this func is fix error when click on player
-    _onInput: function () {
-        if (this.el.localName != 'audio') {
-            this._super.apply(this, arguments);
-        }
-    },
-    // this func is fix error when click on player
-    _getValue: function () {
-        if (this.el.localName != 'audio') {
-            this._super.apply(this, arguments);
-        }
-    },
     _renderPlayer: function () {
-        this.replaceElement(QWeb.render('audio_field', {'widget':this, 'options': this.nodeOptions}));
+        this.$el.html(QWeb.render('audio_field', {'audio_url': this.get('value'), 'options': this.options}));
     },
-    _renderReadonly: function () {
-        this._renderPlayer();
-    },
-    _render: function () {
-        if (this.getParent().mode === "edit" && !this.nodeOptions.show_on_edit_mode) {
-            this._renderEdit();
+    render_value: function() {
+        if (this.get("effective_readonly") && !this.options.show_on_edit_mode) {
+            this._renderPlayer();
         }else{
-            this._renderReadonly();
-        };
-        return;
-    },
+            this._super.apply(this, arguments);
+        }
+    }
+
 });
 
-field_registry.add('audio_field', AudioField);
+core.form_widget_registry.add('audio_field', AudioField);
 
 });
